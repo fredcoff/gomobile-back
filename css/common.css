@@ -1,0 +1,79 @@
+@charset "utf-8";
+/* CSS Document */
+
+.list_table
+{
+	border-collapse:collapse;
+}
+
+.list_table th
+{
+	border: 1px solid #aaaaaa;
+	padding: 0.6em;
+	background:#dddddd;
+}
+
+.list_table  td
+{
+	border: 1px solid #aaaaaa;
+	padding: 0.6em;
+}
+
+.list_table tr.tr_padding th, .list_table  tr.tr_padding td
+{
+	border: none;
+}
+
+/****************** SpinCheck *****************/
+.spinCheck { padding: 0px 0px 0px 0px ; display:block;}
+
+.spinCheck input[type=checkbox] {
+	display: none;
+}
+
+.spinCheck span.spinCheckBox {
+	width: 43px;
+	height: 25px;
+	display: inline-block;
+	vertical-align:middle;
+	background: url("../images/switch_off.png");
+}
+
+.spinCheck input[type=checkbox]:checked + span.spinCheckBox {
+	background: url("../images/switch_on.png");
+}
+
+/****************** NormalCheck *****************/
+.actions {padding: 0px 0px 0px 0px ; display:block;}
+.actionCaption{ font-weight:bold;}
+.actionComment{ font-weight:normal;}
+.actionMessage{ padding: 10px 50px 0px 95px;}
+.actionMessage .messageContent{ font-size:12px;font-weight:normal;}
+
+.actions_group {padding: 0px 50px 20px 75px ; display:block;}
+.actions_group table {
+	font-size:12px;font-weight:normal;
+}
+
+.actions input[type=checkbox] {
+	display: none;
+}
+
+.actions span.actionCheck {
+	width: 23px;
+	height: 23px;
+	display: inline-block;
+	vertical-align:middle;
+	background: url("../images/checkbox_off.png");
+}
+
+.actions input[type=checkbox]:checked + span.actionCheck {
+	background: url("../images/checkbox_on.png");
+}
+
+.myphotos ul li{float:left;text-align:center;font-size:24px;margin-right:10px;}
+.myphotos_photo{background:#fff;box-shadow:0px 1px 3px #333;padding:1px;text-align:center;position:relative;margin:2px}
+.myphotos_photo .img{width:200px;height:150px;overflow:hidden;}
+.myphotos_photo .imgcomment{width:100%;padding:0 0 0 0;}
+
+.myphotos_photo h1{position:absolute;bottom:5px;width:100%;text-align:center;font-weight:bold;font-size:14px;height:15px;line-height:15px;}

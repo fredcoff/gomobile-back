@@ -1,0 +1,57 @@
+@charset "utf-8";
+/* CSS Document */
+* {
+	font-size: 14px;
+	font-family: "Times New Roman", Georgia, serif;
+}
+input[type=text] , input[type=password] {
+	border:1px solid #CDCDCD;
+	margin-top:-5px;
+	padding:2px 0 0 2px;
+}
+body {
+	padding: 0;
+	background: white;
+	text-align: center;
+	font-family: "Times New Roman", Georgia, serif;
+	font-size: 12px;
+	color: #616161;
+}
+
+h1, h2, h3 {
+	margin-top: 0;
+	color: #8C0209;
+}
+
+fieldset label {
+	display: block;
+	width: 8em;
+	float: left;
+}
+
+fieldset p{
+	line-height: 1.2em;
+}
+
+.list_table
+{
+	border-collapse:collapse;
+}
+
+.list_table th
+{
+	border: 1px solid #aaaaaa;
+	padding: 0.6em;
+	background:#dddddd;
+}
+
+.list_table  td
+{
+	border: 1px solid #aaaaaa;
+	padding: 0.6em;
+}
+
+.list_table tr.tr_padding th, .list_table  tr.tr_padding td
+{
+	border: none;
+}
