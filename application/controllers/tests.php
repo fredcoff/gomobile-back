@@ -38,6 +38,7 @@ class Tests extends CI_Controller {
 		$data = array();
 		$data['test_list'] = $test_list;
 		$data['options']	= $options;
+		$data['total_rows'] = $config['total_rows'];
 
 		$this->load->view('tests/signal_strength_list', $data);
 	}
@@ -61,6 +62,7 @@ class Tests extends CI_Controller {
 		$data = array();
 		$data['test_list'] = $test_list;
 		$data['options']	= $options;
+		$data['total_rows'] = $config['total_rows'];
 
 		$this->load->view('tests/network_perform_list', $data);
 	}
@@ -84,6 +86,7 @@ class Tests extends CI_Controller {
 		$data = array();
 		$data['test_list'] = $test_list;
 		$data['options']	= $options;
+		$data['total_rows'] = $config['total_rows'];
 
 		$this->load->view('tests/time_series_list', $data);
 	}
@@ -107,6 +110,7 @@ class Tests extends CI_Controller {
 		$data = array();
 		$data['test_list'] = $test_list;
 		$data['options']	= $options;
+		$data['total_rows'] = $config['total_rows'];
 
 		$this->load->view('tests/ext_npt_list', $data);
 	}
@@ -130,6 +134,7 @@ class Tests extends CI_Controller {
 		$data = array();
 		$data['test_list'] = $test_list;
 		$data['options']	= $options;
+		$data['total_rows'] = $config['total_rows'];
 
 		$this->load->view('tests/call_drop_list', $data);
 	}

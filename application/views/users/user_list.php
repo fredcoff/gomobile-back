@@ -1,25 +1,25 @@
 <?php $this->load->view('common/header.php'); ?>
 
-<form action="<?php echo site_url(''); ?>" method="post" onsubmit="return check();">
+<form action="<?php echo site_url('/'); ?>" method="post" onsubmit="return check();">
 <table border="0" cellpadding="0" cellspacing="0" align=center style="margin-top:50" width="1500">
 	<tbody>
 		<tr height="10">
-			<td width="10"><img src="<?php echo site_url('images/bx_lt.gif'); ?>"></td>
-			<td width="880" background="<?php echo site_url('images/bx_t.gif'); ?>"></td>
-			<td width="10"><img src="<?php echo site_url('images/bx_rt.gif'); ?>"></td>
+			<td width="10"><img src="<?php echo base_url('images/bx_lt.gif'); ?>"></td>
+			<td width="880" background="<?php echo base_url('images/bx_t.gif'); ?>"></td>
+			<td width="10"><img src="<?php echo base_url('images/bx_rt.gif'); ?>"></td>
 		</tr>
 		<tr>
-			<td background="<?php echo site_url('images/bx_l.gif'); ?>"></td>
+			<td background="<?php echo base_url('images/bx_l.gif'); ?>"></td>
 			<td bgcolor="#ffffff" style="padding-bottom: 10px;">
 				<table align="center" cellpadding="5" cellspacing="1" width="1400">
 					<tbody>
 						<tr height=50>
 							<td>
-								<b>User List (Count : <?php echo $this->pagination->total_rows;?>) </b>
+								<b>User List (Count : <?php echo $total_rows;?>) </b>
 							</td>
 						</tr>
 						<tr>
-							<td height="1" background="<?php echo site_url('images/dot.gif'); ?>"></td>
+							<td height="1" background="<?php echo base_url('images/dot.gif'); ?>"></td>
 						</tr>
 						<tr>
 							<td style="padding: 2px;">
@@ -70,12 +70,12 @@
 					</tbody>
 				</table>
 			</td>
-			<td background="<?php echo site_url('images/bx_r.gif'); ?>"></td>
+			<td background="<?php echo base_url('images/bx_r.gif'); ?>"></td>
 		</tr>
 		<tr height="10">
-			<td><img src="<?php echo site_url('images/bx_lb.gif'); ?>" border="0"></td>
-			<td background="<?php echo site_url('images/bx_b.gif'); ?>"></td>
-			<td><img src="<?php echo site_url('images/bx_rb.gif'); ?>" border="0"></td>
+			<td><img src="<?php echo base_url('images/bx_lb.gif'); ?>" border="0"></td>
+			<td background="<?php echo base_url('images/bx_b.gif'); ?>"></td>
+			<td><img src="<?php echo base_url('images/bx_rb.gif'); ?>" border="0"></td>
 		</tr>
 	</tbody>
 </table>

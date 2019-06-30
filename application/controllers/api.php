@@ -15,7 +15,7 @@ class Api extends CI_Controller {
 		if ($this->apiKey) {
 			session_id($this->apiKey);
 		}
-		session_start();
+		@session_start();
 	}
 
 	private function session_check() {
@@ -118,15 +118,44 @@ class Api extends CI_Controller {
 		}
 	}
 
+
 	public function uploadTestResult() {
 		$test_result = file_get_contents('php://input');
 		$json = json_decode($test_result, true);
 
 		$params = array();
+
 		$params['user_email'] = $json['strUser'];
+		$params['user_id'] = $this->admin_manager->get_user_id($params['user_email']);
 		$params['type'] = $json['nType'];
+
 		$params['test_result'] = $test_result;
 		$params['reg_date'] = date(TEST_RESULT_DATEFORMAT, time());
+		$params['register_date'] = date(DEFAULT_DATEFORMAT, time());
+
+		// $test_result = json_decode($params['test_result'], true);
+		if ($params['type'] == 0) {
+			if ($json['bIsLte']) {
+				$params['is_lte'] = 1;
+				$params['ss_val'] = $json['nLteSS'];
+			} else {
+				$params['is_lte'] = 0;
+				$params['ss_val'] = $json['nGsmSS'];
+			}
+			$params['carrier'] = $json['strCarrier'];
+		} else {
+			if ($json['bIsLte']) {
+				$params['is_lte'] = 1;
+			} else {
+				$params['is_lte'] = 0;
+			}
+			$params['ss_val'] = 0;
+		}
+		$params['carrier'] = $json['strCarrier'];
+		$params['lat_point'] = $json['nLatitude'];
+		$params['long_point'] = $json['nLongitude'];
+		$params['batch_no'] = @$json['nTestIdx'];
+		$params['distance'] = @$json['strDistFrom'];
 
 		$idx = $this->api_manager->add_testResultInfo($params);
 
@@ -142,6 +171,12 @@ class Api extends CI_Controller {
 		$ret_resp = make_response(0, '');
 		$ret_resp['admin_list'] = $this->api_manager->get_adminList();
 		$ret_resp['user_list'] = $this->api_manager->get_userList();
+		$ret_resp['test_result_list'] = $this->api_manager->get_testResultist();
+		ret_response($ret_resp);
+	}
+
+	public function getTestResultList() {
+		$ret_resp = make_response(0, '');
 		$ret_resp['test_result_list'] = $this->api_manager->get_testResultist();
 		ret_response($ret_resp);
 	}

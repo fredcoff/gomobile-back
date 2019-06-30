@@ -62,7 +62,24 @@ class Api_manager extends CI_Model {
 	}
 
 	public function add_testResultInfo($params) {
-		$this->db->insert('test_result_info', $params);
+		$this->db->set('user_email', $params['user_email']);
+		$this->db->set('type', $params['type']);
+		$this->db->set('test_result', $params['test_result']);
+		$this->db->set('reg_date', $params['reg_date']);
+		$this->db->set('register_date', $params['register_date']);
+		$this->db->set('is_lte', $params['is_lte']);
+		$this->db->set('ss_val', $params['ss_val']);
+		$this->db->set('lat_point', $params['lat_point']);
+		$this->db->set('carrier', $params['carrier']);
+		$this->db->set('long_point', $params['long_point']);
+		$this->db->set('batch_no', $params['batch_no']);
+		$this->db->set('distance', $params['distance']);
+		$this->db->set('user_id', $params['user_id']);
+
+
+		$this->db->set('test_point', "geomfromtext(\"POINT({$params['long_point']} {$params['lat_point']})\")", false);
+
+		$this->db->insert('test_result_info');
 		return $this->db->insert_id();
 	}
 
@@ -83,7 +100,7 @@ class Api_manager extends CI_Model {
 	}
 
 	public function get_testResultist() {
-		$sql = "SELECT	*
+		$sql = "SELECT	idx, user_email, `type`, test_result, reg_date, register_date, is_lte, carrier, ss_val
 				FROM	test_result_info ";
 		$sql .= " ORDER BY idx DESC ";
 		$query = $this->db->query($sql);

@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-<link rel="stylesheet" href="<?php echo site_url('css/common.css'); ?>" type="text/css" />
-<link rel="stylesheet" href="<?php echo site_url('css/jquery-ui.css'); ?>" type="text/css" />
-<link rel="stylesheet" href="<?php echo site_url('css/admin.css'); ?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo base_url('css/common.css'); ?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo base_url('css/jquery-ui.css'); ?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo base_url('css/admin.css'); ?>" type="text/css" />
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
 <?php if (isset($map)) echo $map['js']; ?>
 </HEAD>
-<script type="text/javascript" src="<?php echo site_url('/js/jquery-latest.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo base_url('/js/jquery-latest.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo base_url('/js/jquery.form.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo base_url('/js/global.js'); ?>"></script>
 <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
@@ -18,28 +18,28 @@
 
 <table border=0 cellpadding=0 cellspacing=0 width=100%>
 	<tr>
-		<td height=52 background="<?php echo site_url('images/header_bg.png'); ?>"> 
-			<a href="#"><img src="<?php echo site_url('images/logo2.png'); ?>" border=0></a> 
+		<td height=52 background="<?php echo base_url('images/header_bg.png'); ?>"> 
+			<a href="#"><img src="<?php echo base_url('images/logo2.png'); ?>" border=0></a> 
 		</td>
-		<td height=50 background="<?php echo site_url('images/header_bg.png'); ?>" align=right style='padding-right:20px;'>
+		<td height=50 background="<?php echo base_url('images/header_bg.png'); ?>" align=right style='padding-right:20px;'>
 			<font style='line-height:18px;'>
 				<font style='font-size:14px;color:#FFFFFF'>ID : <b><?php echo $this->admin_manager->admin_id; ?></b></font>
 				<br>
-				<a href="<?php echo site_url('login/logout'); ?>" style="text-decoration: none;"><font style='font-size:14px;font-weight:bold;color:#F8BCE0'><u>Log Out</u></font></a>
+				<a href="<?php echo base_url('login/logout'); ?>" style="text-decoration: none;"><font style='font-size:14px;font-weight:bold;color:#F8BCE0'><u>Log Out</u></font></a>
 			</font>
 		</td>
 	</tr>
 </table>
 
-<table border=0 cellpadding=0 cellspacing=0 width=100% height=28 background="<?php echo site_url('images/menu_bg.png'); ?>" >
+<table border=0 cellpadding=0 cellspacing=0 width=100% height=28 background="<?php echo base_url('images/menu_bg.png'); ?>" >
 	<tr>
 		<td style='padding-left:200px;'>
 
-			<a href="<?php echo site_url('users/user_list');?>" style="text-decoration: none;" Onmouseover="check_menu(1)"><font style='font-size:16px;font-weight:bold;color:#ffffff;'>User</font></a>
+			<a href="<?php echo site_url('/users/user_list');?>" style="text-decoration: none;" Onmouseover="check_menu(1)"><font style='font-size:16px;font-weight:bold;color:#ffffff;'>User</font></a>
 			<font style='font-size:20px;color:#f4f4ff;'>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</font>
-			<a href="<?php echo site_url('tests/signal_strength_list');?>" style="text-decoration: none;" Onmouseover="check_menu(2)"><font style='font-size:16px;font-weight:bold;color:#ffffff;'>Test Result</font></a>
+			<a href="<?php echo site_url('/tests/signal_strength_list');?>" style="text-decoration: none;" Onmouseover="check_menu(2)"><font style='font-size:16px;font-weight:bold;color:#ffffff;'>Test Result</font></a>
 			<font style='font-size:20px;color:#f4f4ff;'>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</font>
-			<a href="<?php echo site_url('admin/modify_admin');?>" style="text-decoration: none;" Onmouseover="check_menu(3)"><font style='font-size:16px;font-weight:bold;color:#ffffff;'>System</font></a>
+			<a href="<?php echo site_url('/admin/modify_admin');?>" style="text-decoration: none;" Onmouseover="check_menu(3)"><font style='font-size:16px;font-weight:bold;color:#ffffff;'>System</font></a>
 		</td>
 	</tr>
 </table>

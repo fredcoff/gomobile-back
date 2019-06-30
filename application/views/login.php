@@ -3,7 +3,7 @@
 <title>GoMobile</title>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
 
-<script type="text/javascript" src="<?php echo site_url('js/jquery-latest.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo base_url('js/jquery-latest.js'); ?>"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
@@ -72,7 +72,7 @@ input[type=submit] {
 		<div class="col-md-4"></div>
 		<div class="col-md-4">
 			<div class="" style="text-align: center;">
-				<img align=center src="<?php echo site_url('images/logo.png'); ?>" />
+				<img align=center src="<?php echo base_url('images/logo.png'); ?>" />
 				<br/><br/>
 			</div>
 			<div class="container">

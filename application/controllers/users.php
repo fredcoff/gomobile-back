@@ -37,6 +37,7 @@ class Users extends CI_Controller {
 		$data = array();
 		$data['user_list'] = $user_list;
 		$data['options']	= $options;
+		$data['total_rows'] = $config['total_rows'];
 
 		$this->load->view('users/user_list', $data);
 	}

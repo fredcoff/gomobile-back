@@ -1,6 +1,6 @@
 <?php
 
-// Created at 2019-04-11
+
 
 class Admin extends CI_Controller {
 
@@ -11,12 +11,58 @@ class Admin extends CI_Controller {
 		if (isset($_SERVER['HTTP_REFERER'])) {
 			$this->session->set_userdata('previous_page', $_SERVER['HTTP_REFERER']);
 		} else {
-			$this->session->set_userdata('previous_page', base_url());
+			$this->session->set_userdata('previous_page', site_url('/'));
 		}
 	}
 
 	public function index() {
 		redirect('admin/modify_admin');
+	}
+
+	public function kml() {
+		$this->load->model('test_manager');
+		$this->load->model('exporter_manager');
+		$criteria = array(
+			'type' => 1,
+			'blackspot' => 0,
+			'start_date' => '2019-06-16',
+			'end_date' => '2019-06-16',
+			'hour' => -1,
+			'showMarker' => 'true',
+			'showCoverage' => 'true',
+		);
+		$propertyOptions = json_decode(
+			'{"marker":{"fillColor":"#9b5b19","fillOpacity":0.5,"strokeWeight":3,"strokeColor":"#0558E3"},"coverage":{"fillColor":"","strokeColor":"","fillOpacity":0.5,"strokeWeight":3,"strokeOpacity":1,"radius":12},"geofencing":{"fillColor":"#9b5b19","fillOpacity":0.5,"strokeWeight":3,"strokeColor":"#0558E3"}}', true);
+
+		$result = $this->test_manager->get_test_data($criteria);
+
+		$knn_result_and_stats = $this->test_manager->knn_line($result, $criteria);
+		$this->load->model('exporter_manager');
+
+		$kmlOption = array(
+			'type' => $criteria['type'],
+			'blackspot' => $criteria['blackspot']
+		);
+
+		$lineOption = array(
+			'stroke' => 8,
+			'transparency' => 0.8
+		);
+
+		$fileName = "download.kml";
+		header('Content-Type: text/xml');
+		header('Content-Disposition: attachment; filename="' . $fileName . '"');
+
+		ob_start();
+		$this->exporter_manager->strength_kml($result, $knn_result_and_stats, $kmlOption, $propertyOptions);
+		ob_end_flush();
+
+		// var_dump($knn_result);
+		// $this->exporter_manager->strength_kml($result, $criteria);
+	}
+
+	public function migration() {
+		$this->admin_manager->migration();
 	}
 
 	public function modify_admin() {
