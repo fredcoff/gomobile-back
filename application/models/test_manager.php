@@ -303,6 +303,17 @@ order by  B.lat_point ASC, B.long_point ASC
 		return $query->row_array();
 	}
 
+	public function get_home_stats() {
+	    $stats = array();
+	    for ($i = 0; $i < 3; $i++) {
+            $sql = "select count(*) as total_count from test_result_info where type = {$i}";
+            $query = $this->db->query($sql);
+            $result = $query->row_array();
+            $stats[] = $result['total_count'];
+        }
+	    return $stats;
+    }
+
 	public function knn_line($marker_list, $criteria) {
 
 		$clusterer = new Geo\Clusterer(
@@ -326,18 +337,19 @@ order by  B.lat_point ASC, B.long_point ASC
 
 // add locations to clusterer
 
-		/*
-		$clusterer->addCoordinate(new Geo\Coordinate(50.824167, 3.263889)); // Kortrijk railway station
-		$clusterer->addCoordinate(new Geo\Coordinate(51.035278, 3.709722)); // Gent-Sint-Pieters railway station
-		$clusterer->addCoordinate(new Geo\Coordinate(50.881365, 4.715682)); // Leuven railway station
-		$clusterer->addCoordinate(new Geo\Coordinate(50.860526, 4.361787)); // Brussels North railway station
-		$clusterer->addCoordinate(new Geo\Coordinate(50.836712, 4.337521)); // Brussels South railway station
-		$clusterer->addCoordinate(new Geo\Coordinate(50.845466, 4.357113)); // Brussels Central railway station
-		$clusterer->addCoordinate(new Geo\Coordinate(51.216227, 4.421180)); // Antwerpen Central railway station
-		*/
 		foreach ($marker_list as $marker) {
+		    $ss_val = $marker['ss_val'];
+		    if ($ss_val < 0)
+		        $ss_val = 0;
+		    if ($marker['is_lte']) {
+		        if ($ss_val > 63) $ss_val = 63;
+            } else { // GSM
+                if ($ss_val > 31) $ss_val = 31;
+
+                $ss_val = $ss_val * 2;
+            }
 			$clusterer->addCoordinate(new Geo\Coordinate($marker['lat_point'], $marker['long_point'],
-				array('carrier' => $marker['carrier'], 'ss_val' => $marker['ss_val'], 'distance' => $marker['distance'])));
+				array('carrier' => $marker['carrier'], 'ss_val' => $ss_val, 'distance' => $marker['distance'])));
 		}
 
 		$cluster_info = $clusterer->getClusters();

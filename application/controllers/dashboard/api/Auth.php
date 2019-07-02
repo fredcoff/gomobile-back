@@ -16,7 +16,6 @@ class Auth extends BD_Controller {
         $this->methods['users_delete']['limit'] = 50; // 50 requests per hour per user/key
         $this->load->model('user_manager');
 		$this->load->model('admin_manager');
-
     }
 
     public function logout_get() {

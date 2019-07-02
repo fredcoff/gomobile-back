@@ -23,9 +23,9 @@ class Admin extends CI_Controller {
 		$this->load->model('test_manager');
 		$this->load->model('exporter_manager');
 		$criteria = array(
-			'type' => 1,
+			'type' => 2,
 			'blackspot' => 0,
-			'start_date' => '2019-07-02',
+			'start_date' => '2019-06-02',
 			'end_date' => '2019-07-02',
 			'hour' => -1,
 			'showMarker' => 'true',
@@ -39,18 +39,9 @@ class Admin extends CI_Controller {
 		$knn_result_and_stats = $this->test_manager->knn_line($result, $criteria);
 		$this->load->model('exporter_manager');
 
-		$kmlOption = array(
-			'type' => $criteria['type'],
-			'blackspot' => $criteria['blackspot']
-		);
-
-		$lineOption = array(
-			'stroke' => 8,
-			'transparency' => 0.8
-		);
 
 		ob_start();
-		$this->exporter_manager->strength_kml($result, $knn_result_and_stats, $kmlOption, $propertyOptions);
+		$this->exporter_manager->generate_excel($result, $knn_result_and_stats, $criteria, $propertyOptions);
 		ob_end_flush();
 
 		// var_dump($knn_result);

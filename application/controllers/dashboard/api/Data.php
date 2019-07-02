@@ -95,41 +95,47 @@ class Data extends BD_Controller {
 			$criteria['user_id'] = $current_user['idx'];
 		}
 
-
         $result = $this->test_manager->get_test_data($criteria);
 		$knn_result_and_stats = $this->test_manager->knn_line($result, $criteria);
 
 		$propertyOptions = json_decode($this->get('options'), true);
 
+		/*
+        $kmlOption = array(
+            'type' => $criteria['type'],
+            'blackspot' => $criteria['blackspot']
+        );
+
+        $lineOption = array(
+            'stroke' => 8,
+            'transparency' => 0.8
+        );
+
+        if ($this->get('stroke')) {
+            $lineOption['stroke'] = $this->get('stroke');
+        }
+        if ($this->get('transparency')) {
+            $lineOption['transparency'] = $this->get('transparency');
+        }
+		*/
+
 		if ($this->get('kml')) {
 			$this->load->model('exporter_manager');
 
-			$kmlOption = array(
-				'type' => $criteria['type'],
-				'blackspot' => $criteria['blackspot']
-			);
-
-			$lineOption = array(
-				'stroke' => 8,
-				'transparency' => 0.8
-			);
-
-			if ($this->get('stroke')) {
-				$lineOption['stroke'] = $this->get('stroke');
-			}
-			if ($this->get('transparency')) {
-				$lineOption['transparency'] = $this->get('transparency');
-			}
-
 			$fileName = $this->exporter_manager->strength_kml_name($criteria);
+			$fileName .= '.kml';
+
 			header('Content-Type: text/xml');
 			header('Content-Disposition: attachment; filename="' . $fileName . '"');
 
 			ob_start();
-			$this->exporter_manager->strength_kml($result, $knn_result_and_stats, $criteria, $propertyOptions);
+			$this->exporter_manager->generate_kml($result, $knn_result_and_stats, $criteria, $propertyOptions);
 			ob_end_flush();
 
-		} else {
+		} else if ($this->get('excel')) {
+            $this->load->model('exporter_manager');
+            $this->exporter_manager->generate_excel($result, $knn_result_and_stats, $criteria, $propertyOptions);
+        } else {
 			$return_result = array('markers' => $result,
 				'lines' => $knn_result_and_stats['dots'],
 				'stats' => $knn_result_and_stats['stats']);

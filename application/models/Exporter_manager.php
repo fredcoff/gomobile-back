@@ -6,6 +6,8 @@
  * Time: 5:42 PM
  */
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Exporter_manager extends CI_Model {
 
@@ -107,7 +109,105 @@ class Exporter_manager extends CI_Model {
 			"Device : " . $test_result['strDevice'] . "<br/>";
 	}
 
-	public function strength_kml($result, $knn_result,
+
+    /**
+     * get kml file name
+     *
+     * @param $criteria
+     * @return string
+     */
+    public function strength_kml_name($criteria, $prefix = 'KML') {
+        $file_str = $prefix;
+        $type_str = 'UNKNOWN';
+        switch ($criteria['type']) {
+            case 0: $type_str = 'SS'; break;
+            case 1: $type_str = 'NPT'; break;
+            case 2: $type_str = 'TST'; break;
+            case 3: $type_str = 'ETS'; break;
+            case 4: $type_str = 'ext TS'; break;
+            default: break;
+        }
+
+        $comm_type = 'ALL';
+        if (array_key_exists('is_lte', $criteria)) {
+            if ($criteria['is_lte']) {
+                $comm_type = 'LTE';
+            } else {
+                $comm_type = 'GSM';
+            }
+        }
+
+        $carrier = 'ALL';
+        if (array_key_exists('carrier', $criteria)) {
+            $carrier_id = $this->test_manager->get_carrier_id($criteria['carrier']);
+            if ($carrier_id == 0) {
+                $carrier = 'Tel';
+            } else if ($carrier_id == 1) {
+                $carrier = 'Vod';
+            } else if ($carrier_id == 2) {
+                $carrier = 'Opt';
+            }
+        }
+
+        return "{$file_str}_{$type_str}_{$comm_type}_{$carrier}_{$criteria['start_date']}_{$criteria['end_date']}";
+    }
+
+    private function getKMLNetworkPerformDescription($type, $test_info, $nOffset) {
+        $sb = '';
+        $sb .= '<Placemark>';
+        $sb .= '<name />';
+        $sb .= '<description>';
+        $sb .= $this->getKMLBasicDescription($test_info);
+        $sb .= "<br />Test Result<br />" .
+            "Latency : " . number_format($test_info['nLatency']) . ' ms <br />'.
+            'Download (raw) : ' . number_format($test_info['nDownloadRate']) . ' bit/s <br />'.
+            'Download (Mbps) : ' . number_format($test_info['nDownloadRate'] / (1024 * 1024), 2) . ' Mbps <br />'.
+            'Upload (raw) : ' . number_format($test_info['nUploadRate']) . ' bit/s <br />'.
+            'Upload (Mbps) : ' . number_format($test_info['nUploadRate'] / (1024 * 1024), 2) . ' Mbps <br />';
+
+        if ($type == 2 || $type == 3) {
+            $sb .= '<br />Average<br />'.
+                'Ping (ms) : ' . $test_info['strAvgPings'] . '<br />'.
+                'Download (Mbps) : ' . $test_info['strAvgDownloadRates'] . '<br />'.
+                'Upload (Mbps) : ' . $test_info['strAvgUploadRates']. '<br />';
+        }
+        $sb .= '<br />Comments : '.$test_info['strComments'];
+        if ($type == 2 || $type == 3) {
+            $sb .= '<br />Start : ' . $test_info['strDateTime'];
+            $sb .= '<br />End : ' . $test_info['strEndDateTime'];
+        } else {
+            $sb .= '<br />Tested At : '.$test_info['strDateTime'];
+        }
+
+        $sb .= '</td></tr></table>]]></description>';
+        $sb .= '<styleUrl>';
+        if ($nOffset == 1) {
+            if (array_key_exists('nSuccess', $test_info) && $test_info['nSuccess'] <= 0) {
+                $test_info['nLatency'] = 0;
+            }
+            $sb .= '#signalLevel'. $this->getPingGrade($test_info['nLatency']);
+        } else if ($nOffset == -1) {
+            if (array_key_exists('nSuccess', $test_info) && $test_info['nSuccess'] <= 0) {
+                $test_info['nUploadRate'] = 0;
+            }
+            $sb .= '#signalLevel'. $this->getUploadGrade($test_info['nUploadRate']);
+        } else {
+            if (array_key_exists('nSuccess', $test_info) && $test_info['nSuccess'] <= 0) {
+                $test_info['nDownloadRate'] = 0;
+            }
+            $sb .= '#signalLevel'. $this->getDownloadGrade($test_info['nDownloadRate']);
+        }
+        $sb .= '</styleUrl>';
+        $sb .= '<Point>';
+        $sb .= '<coordinates>';
+        $sb .= (floatval($test_info['nLongitude']) + 0.0001 * $nOffset) . ',' . $test_info['nLatitude'].','.$test_info['nAltitude'];
+        $sb .= '</coordinates>';
+        $sb .= '</Point>';
+        $sb .= '</Placemark>';
+        return $sb;
+    }
+
+	public function generate_kml($result, $knn_result,
 								 $kmlOption = array('type' => 0, 'blackspot' => 0) ,
 								 $options = array()) {
 		$this->load->model('test_manager');
@@ -201,145 +301,210 @@ class Exporter_manager extends CI_Model {
 				echo $this->getKMLNetworkPerformDescription($type, $test_result, -1);
 			}
 		}
-		// echo "</Folder>";
-		/*
-		foreach($marker_data as $item) {
-
-			$test_result = json_decode($item['test_result'], true);
-			$point = array(
-				'lat' => $test_result['nLatitude'],
-				'lng' => $test_result['nLongitude'],
-			);
-
-			$storePrevious = true;
-
-			if ($type >= 1) {
-				if ($type == 1)
-					$nLatency = $this->getPingGrade($test_result['nLatency']);
-				else
-					$nLatency = $test_result['nLatency'];
-				echo "<Placemark><name /><description><![CDATA[111]]></description><styleUrl>#signalLevel{$nLatency}</styleUrl><Point><coordinates>{$point['lng']},{$point['lat']},0.</coordinates></Point></Placemark>";
-
-				continue;
-			}
-
-			if ($previousPoint) {
-
-				$isConnectable = false;
-				$diff_distance = $this->point_distance_kilometer($previousPoint, $point);
-
-				if ($type == 0) {
-					if ($item['batch_no'] > 0 && $item['batch_no'] == $previousItem['batch_no']) { // same batch no
-						if ($diff_distance < 0.5) {
-							$isConnectable = true;
-						} else {
-							$storePrevious = false;
-						}
-					} else if ($item['batch_no'] == 0 && $diff_distance < 0.1) {
-						$isConnectable = true;
-					}
-				}
-
-				if ($isConnectable) {
-					$connLineOption = $lineOption;
-					$connLineOption['color'] = $this->getLineColor($previousItem, $item, $kmlOption);
-					$this->connect_point_strength_kml($previousPoint, $point, $connLineOption);
-				}
-			}
-
-			if ($storePrevious) {
-				$previousItem = $item;
-				$previousPoint = $point;
-			}
-		}
-		*/
-
 
 		// write footer
 		echo '</Document> </kml>';
 	}
 
-	public function strength_kml_name($criteria) {
-		$file_str = 'KML';
-		$type_str = 'UNKNOWN';
-		switch ($criteria['type']) {
-			case 0: $type_str = 'SS'; break;
-			case 1: $type_str = 'NPT'; break;
-			case 2: $type_str = 'TST'; break;
-			case 3: $type_str = 'ETS'; break;
-			case 4: $type_str = 'ext TS'; break;
-			default: break;
-		}
 
-		$comm_type = 'ALL';
-		if (array_key_exists('is_lte', $criteria)) {
-			if ($criteria['is_lte']) {
-				$comm_type = 'LTE';
-			} else {
-				$comm_type = 'GSM';
-			}
-		}
+    public function generate_excel($result, $knn_result,
+                                 $kmlOption = array('type' => 0, 'blackspot' => 0) ,
+                                 $options = array()) {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-		$carrier = 'ALL';
-		if (array_key_exists('carrier', $criteria)) {
-			$carrier_id = $this->test_manager->get_carrier_id($criteria['carrier']);
-			if ($carrier_id == 0) {
-				$carrier = 'Tel';
-			} else if ($carrier_id == 1) {
-				$carrier = 'Vod';
-			} else if ($carrier_id == 2) {
-				$carrier = 'Opt';
-			}
-		}
+        if ($kmlOption['type'] == 1) {
+            // write header
+            $sheet->setCellValue('G1', 'Telstra NPT Scores');
+            $sheet->mergeCells('G1:L1');
+            $sheet->setCellValue('M1', 'Optus NPT Scores');
+            $sheet->mergeCells('M1:R1');
+            $sheet->setCellValue('S1', 'Vodafone NPT Scores');
+            $sheet->mergeCells('S1:X1');
 
-		return "{$file_str}_{$type_str}_{$comm_type}_{$carrier}_{$criteria['start_date']}_{$criteria['end_date']}.kml";
-	}
+            //
+            $sheet->setCellValue('G2', '3G GSM');
+            $sheet->mergeCells('G2:I2');
+            $sheet->setCellValue('J2', '4G LTE');
+            $sheet->mergeCells('J2:L2');
+            $sheet->setCellValue('M2', '3G GSM');
+            $sheet->mergeCells('M2:O2');
+            $sheet->setCellValue('P2', '4G LTE');
+            $sheet->mergeCells('P2:R2');
+            $sheet->setCellValue('S2', '3G GSM');
+            $sheet->mergeCells('S2:U2');
+            $sheet->setCellValue('V2', '4G LTE');
+            $sheet->mergeCells('V2:X2');
 
-	private function getKMLNetworkPerformDescription($type, $test_info, $nOffset) {
-		$sb = '';
-		$sb .= '<Placemark>';
-		$sb .= '<name />';
-		$sb .= '<description>';
-		$sb .= $this->getKMLBasicDescription($test_info);
-		$sb .= "<br />Test Result<br />" .
-			"Latency : " . number_format($test_info['nLatency']) . ' ms <br />'.
-			'Download (raw) : ' . number_format($test_info['nDownloadRate']) . ' bit/s <br />'.
-			'Download (Mbps) : ' . number_format($test_info['nDownloadRate'] / (1024 * 1024), 2) . ' Mbps <br />'.
-			'Upload (raw) : ' . number_format($test_info['nUploadRate']) . ' bit/s <br />'.
-			'Upload (Mbps) : ' . number_format($test_info['nUploadRate'] / (1024 * 1024), 2) . ' Mbps <br />';
+            //
+            $sheet->setCellValue('A3', '#');
+            $sheet->setCellValue('B3', 'Date');
+            $sheet->setCellValue('C3', 'Time');
+            $sheet->setCellValue('D3', 'Lat');
+            $sheet->setCellValue('E3', 'Lng');
+            $sheet->setCellValue('F3', 'Comment');
+            $sheet->setCellValue('G3', 'Ping');
+            $sheet->setCellValue('H3', 'Download');
+            $sheet->setCellValue('I3', 'Upload');
+            $sheet->setCellValue('J3', 'Ping');
+            $sheet->setCellValue('K3', 'Download');
+            $sheet->setCellValue('L3', 'Upload');
+            $sheet->setCellValue('M3', 'Ping');
+            $sheet->setCellValue('N3', 'Download');
+            $sheet->setCellValue('O3', 'Upload');
+            $sheet->setCellValue('P3', 'Ping');
+            $sheet->setCellValue('Q3', 'Download');
+            $sheet->setCellValue('R3', 'Upload');
+            $sheet->setCellValue('S3', 'Ping');
+            $sheet->setCellValue('T3', 'Download');
+            $sheet->setCellValue('U3', 'Upload');
+            $sheet->setCellValue('V3', 'Ping');
+            $sheet->setCellValue('W3', 'Download');
+            $sheet->setCellValue('X3', 'Upload');
 
-		if ($type == 2 || $type == 3) {
-			$sb .= '<br />Average<br />'.
-				'Ping (ms) : ' . $test_info['strAvgPings'] . '<br />'.
-				'Download (Mbps) : ' . $test_info['strAvgDownloadRates'] . '<br />'.
-				'Upload (Mbps) : ' . $test_info['strAvgUploadRates']. '<br />';
-		}
-		$sb .= '<br />Comments : '.$test_info['strComments'];
-		if ($type == 2 || $type == 3) {
-			$sb .= '<br />Start : ' . $test_info['strDateTime'];
-			$sb .= '<br />End : ' . $test_info['strEndDateTime'];
-		} else {
-			$sb .= '<br />Tested At : '.$test_info['strDateTime'];
-		}
+            $row = 4;
+            $idx = 1;
+            foreach ($result as $marker_data) {
+                $test_result = json_decode($marker_data['test_result'], true);
+                if (!array_key_exists('nSuccess', $test_result) || @$test_result['nSuccess'] > 0) {
+                    $nLatency = $test_result['nLatency'];
+                    $nUploadRate = $test_result['nUploadRate'];
+                    $nDownloadRate = $test_result['nDownloadRate'];
+                } else if ($test_result['nSuccess'] == 0) {
+                    continue; // skip
+                } else {
+                    $nLatency = 0;
+                    $nUploadRate = 0;
+                    $nDownloadRate = 0;
+                }
+                $carrier_id = $this->test_manager->get_carrier_id($marker_data['carrier']);
 
-		$sb .= '</td></tr></table>]]></description>';
-		$sb .= '<styleUrl>';
-		if ($nOffset == 1) {
-			$sb .= '#signalLevel'. $this->getPingGrade($test_info['nLatency']);
-		} else if ($nOffset == -1) {
-			$sb .= '#signalLevel'. $this->getUploadGrade($test_info['nUploadRate']);
-		} else {
-			$sb .= '#signalLevel'. $this->getDownloadGrade($test_info['nDownloadRate']);
-		}
-		$sb .= '</styleUrl>';
-		$sb .= '<Point>';
-		$sb .= '<coordinates>';
-		$sb .= (floatval($test_info['nLongitude']) + 0.0001 * $nOffset) . ',' . $test_info['nLatitude'].','.$test_info['nAltitude'];
-		$sb .= '</coordinates>';
-		$sb .= '</Point>';
-		$sb .= '</Placemark>';
-		return $sb;
-	}
+                $dateTime = explode(' ', $marker_data['register_date']);
+                $sheet->setCellValueByColumnAndRow(1, $row, $idx);
+                $sheet->setCellValueByColumnAndRow(2, $row, $dateTime[0]);
+                $sheet->setCellValueByColumnAndRow(3, $row, $dateTime[1]);
+                $sheet->setCellValueByColumnAndRow(4, $row, $marker_data['lat_point']);
+                $sheet->setCellValueByColumnAndRow(5, $row, $marker_data['long_point']);
+                $sheet->setCellValueByColumnAndRow(6, $row, $test_result['strComments']);
+
+                $column = 7 + $carrier_id * 6 + $marker_data['is_lte'] * 3;
+                $sheet->setCellValueByColumnAndRow($column, $row, $nLatency);
+                $sheet->setCellValueByColumnAndRow($column + 1, $row, $nDownloadRate);
+                $sheet->setCellValueByColumnAndRow($column + 2, $row, $nUploadRate);
+
+                $row++;
+                $idx++;
+            }
+        } else if ($kmlOption['type'] == 2) {
+            // write header
+            $sheet->setCellValue('H1', 'Telstra NPT Scores');
+            $sheet->mergeCells('H1:M1');
+            $sheet->setCellValue('N1', 'Optus NPT Scores');
+            $sheet->mergeCells('N1:S1');
+            $sheet->setCellValue('T1', 'Vodafone NPT Scores');
+            $sheet->mergeCells('T1:Y1');
+
+            //
+            $sheet->setCellValue('H2', '3G GSM');
+            $sheet->mergeCells('H2:J2');
+            $sheet->setCellValue('K2', '4G LTE');
+            $sheet->mergeCells('K2:M2');
+            $sheet->setCellValue('N2', '3G GSM');
+            $sheet->mergeCells('N2:P2');
+            $sheet->setCellValue('Q2', '4G LTE');
+            $sheet->mergeCells('Q2:S2');
+            $sheet->setCellValue('T2', '3G GSM');
+            $sheet->mergeCells('T2:V2');
+            $sheet->setCellValue('W2', '4G LTE');
+            $sheet->mergeCells('W2:Y2');
+
+            //
+            $sheet->setCellValue('A3', '#');
+            $sheet->setCellValue('B3', 'Date');
+            $sheet->setCellValue('C3', 'Time');
+            $sheet->setCellValue('D3', 'Lat');
+            $sheet->setCellValue('E3', 'Lng');
+            $sheet->setCellValue('F3', 'Comment');
+            $sheet->setCellValue('G3', 'Test Index');
+            $sheet->setCellValue('H3', 'Ping');
+            $sheet->setCellValue('I3', 'Download');
+            $sheet->setCellValue('J3', 'Upload');
+            $sheet->setCellValue('K3', 'Ping');
+            $sheet->setCellValue('L3', 'Download');
+            $sheet->setCellValue('M3', 'Upload');
+            $sheet->setCellValue('N3', 'Ping');
+            $sheet->setCellValue('O3', 'Download');
+            $sheet->setCellValue('P3', 'Upload');
+            $sheet->setCellValue('Q3', 'Ping');
+            $sheet->setCellValue('R3', 'Download');
+            $sheet->setCellValue('S3', 'Upload');
+            $sheet->setCellValue('T3', 'Ping');
+            $sheet->setCellValue('U3', 'Download');
+            $sheet->setCellValue('V3', 'Upload');
+            $sheet->setCellValue('W3', 'Ping');
+            $sheet->setCellValue('X3', 'Download');
+            $sheet->setCellValue('Y3', 'Upload');
+
+            $row = 4;
+            $idx = 1;
+            foreach ($result as $marker_data) {
+                $test_result = json_decode($marker_data['test_result'], true);
+                if (!array_key_exists('nSuccess', $test_result) || @$test_result['nSuccess'] > 0) {
+                    $is_fail = false;
+                } else if ($test_result['nSuccess'] == 0) {
+                    continue; // skip
+                } else {
+                    $is_fail = true;
+                }
+                $carrier_id = $this->test_manager->get_carrier_id($marker_data['carrier']);
+
+                $dateTime = explode(' ', $marker_data['register_date']);
+                $sheet->setCellValueByColumnAndRow(1, $row, $idx);
+                $sheet->setCellValueByColumnAndRow(2, $row, $dateTime[0]);
+                $sheet->setCellValueByColumnAndRow(3, $row, $dateTime[1]);
+                $sheet->setCellValueByColumnAndRow(4, $row, $marker_data['lat_point']);
+                $sheet->setCellValueByColumnAndRow(5, $row, $marker_data['long_point']);
+                $sheet->setCellValueByColumnAndRow(6, $row, $test_result['strComments']);
+
+                $column = 8 + $carrier_id * 6 + $marker_data['is_lte'] * 3;
+                if ($is_fail) {
+                    $sheet->setCellValueByColumnAndRow(7, $row, '-');
+                    $sheet->setCellValueByColumnAndRow($column, $row, 0);
+                    $sheet->setCellValueByColumnAndRow($column + 1, $row, 0);
+                    $sheet->setCellValueByColumnAndRow($column + 2, $row, 0);
+                    $row++;
+                } else {
+                    $ping_datas = explode(',', $test_result['strAvgPings']);
+                    $down_datas = explode(',', $test_result['strAvgDownloadRates']);
+                    $upload_datas = explode(',', $test_result['strAvgUploadRates']);
+                    $test_count = min($test_result['nTestCount'], count($ping_datas), count($down_datas), count($upload_datas));
+
+                    for ($i = 0; $i < $test_count; $i++) {
+                        $sheet->setCellValueByColumnAndRow(7, $row, $i+1);
+                        $sheet->setCellValueByColumnAndRow($column, $row, $ping_datas[$i]);
+                        $sheet->setCellValueByColumnAndRow($column + 1, $row, $down_datas[$i]);
+                        $sheet->setCellValueByColumnAndRow($column + 2, $row, $upload_datas[$i]);
+                        $row++;
+                    }
+                }
+                $idx++;
+            }
+        } else {
+            return;
+        }
+
+        $filename = $this->strength_kml_name($kmlOption, 'EXCEL');
+        // $filename .= '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        // $filename = 'name-of-the-generated-file.xlsx';
+
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="'. $filename .'.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+    }
+
 
 	private function getPingGrade($latency) {
 		$nGrade = 0;
@@ -490,6 +655,7 @@ class Exporter_manager extends CI_Model {
 		}
 		return array('pinColor' => $pinColor, 'textColor' => $textColor);
 	}
+
 	private function writeIconHeader($type) {
 		if ($type == 0 || $type == 1) {
 			$sb = "";
