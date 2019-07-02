@@ -53,7 +53,7 @@ class User_manager extends CI_Model {
 	}
 
 	function is_super($current_user) {
-		return ($current_user['role'] == 0);
+		return ($current_user['role'] == 100);
 	}
 
 	/**

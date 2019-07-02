@@ -25,8 +25,8 @@ class Admin extends CI_Controller {
 		$criteria = array(
 			'type' => 1,
 			'blackspot' => 0,
-			'start_date' => '2019-06-16',
-			'end_date' => '2019-06-16',
+			'start_date' => '2019-07-02',
+			'end_date' => '2019-07-02',
 			'hour' => -1,
 			'showMarker' => 'true',
 			'showCoverage' => 'true',
@@ -48,10 +48,6 @@ class Admin extends CI_Controller {
 			'stroke' => 8,
 			'transparency' => 0.8
 		);
-
-		$fileName = "download.kml";
-		header('Content-Type: text/xml');
-		header('Content-Disposition: attachment; filename="' . $fileName . '"');
 
 		ob_start();
 		$this->exporter_manager->strength_kml($result, $knn_result_and_stats, $kmlOption, $propertyOptions);

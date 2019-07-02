@@ -199,10 +199,14 @@ class Data extends BD_Controller {
 
 		$criteria = array();
 		if ($this->user_manager->is_super($current_user)) {
-
+		    if ($this->get('mine')) {
+                $criteria['user_id'] = $current_user['idx'];
+            }
 		} else {
 			$criteria['user_id'] = $current_user['idx'];
 		}
+
+		// var_dump($criteria);
 
     	$total_ss = $this->test_manager->get_stats_ss($criteria);
 		$total_ss_spot = $this->test_manager->get_stats_ss_blackspot($criteria);

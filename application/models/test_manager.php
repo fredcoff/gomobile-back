@@ -87,7 +87,7 @@ class Test_manager extends CI_Model {
 			// $where_clauses .= ' AND _tblname.distance < 100 ';
 		}
 
-		if ($criteria['user_id']) {
+		if (@$criteria['user_id']) {
 			$where_clauses .= ' AND _tblname.user_id = '.$criteria['user_id'];
 		}
 
@@ -279,7 +279,7 @@ order by  B.lat_point ASC, B.long_point ASC
 
 	public function get_stats_ss($criteria) {
 		$sql = "select count(*) as total_count, sum(distance) as total_distance from test_result_info where type = 0 ";
-		if ($criteria['user_id']) {
+		if (@$criteria['user_id']) {
 			$sql .= " AND user_id = {$criteria['user_id']} ";
 		}
 		$query = $this->db->query($sql);
@@ -288,7 +288,7 @@ order by  B.lat_point ASC, B.long_point ASC
 
 	public function get_stats_ss_blackspot($criteria) {
 		$sql = "select count(*) as total_count, sum(distance) as total_distance from test_result_info where type = 0 and ss_val <= 3 ";
-		if ($criteria['user_id']) {
+		if (@$criteria['user_id']) {
 			$sql .= " AND user_id = {$criteria['user_id']} ";
 		}
 		$query = $this->db->query($sql);
@@ -296,7 +296,7 @@ order by  B.lat_point ASC, B.long_point ASC
 	}
 	public function get_stats_npt($criteria) {
 		$sql = "select count(*) as total_count from test_result_info where type = 1 ";
-		if ($criteria['user_id']) {
+		if (@$criteria['user_id']) {
 			$sql .= " AND user_id = {$criteria['user_id']} ";
 		}
 		$query = $this->db->query($sql);
