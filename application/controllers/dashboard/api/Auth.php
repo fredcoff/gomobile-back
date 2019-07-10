@@ -71,7 +71,7 @@ class Auth extends BD_Controller {
 
 		$config = array(
 			'upload_path' => __DIR__."/../../../../uploads/",
-			'allowed_types' => "kml",
+			'allowed_types' => "kml|kmz",
 			'overwrite' => TRUE,
 			'max_size' => "204800000", // Can be set to particular file size , here it is 2 MB(2048 Kb)
 			'encrypt_name' => true,
